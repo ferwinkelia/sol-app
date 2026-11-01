@@ -1,0 +1,49 @@
+# Sol — stack para Portainer
+# Pegar este contenido en Portainer › Stacks › Add stack › Web editor.
+# Antes de desplegar, cambiá APP_PIN y API_TOKEN si querés otros valores.
+services:
+  sol:
+    image: python:3.13-slim
+    container_name: sol-app
+    restart: unless-stopped
+    environment:
+      APP_PIN: "CAMBIAR"
+      API_TOKEN: "CAMBIAR"
+      TZ_OFFSET: "-3"
+      PORT: "8090"
+      GITHUB_REPO: "ferwinkelia/sol-app"
+      UPDATE_MINUTES: "5"
+    ports:
+      - "8090:8090"
+    volumes:
+      - sol-data:/data
+    command:
+      - python
+      - -c
+      - |
+        import io, os, json, tarfile, time, urllib.request as u
+        cur = "/data/app/current"
+        repo = os.environ["GITHUB_REPO"]
+        while not os.path.isfile(cur + "/server/launcher.py"):
+            try:
+                h = {"User-Agent": "sol-app"}
+                sha = json.loads(u.urlopen(u.Request("https://api.github.com/repos/%s/commits/main" % repo, headers=h), timeout=60).read())["sha"]
+                t = tarfile.open(fileobj=io.BytesIO(u.urlopen(u.Request("https://codeload.github.com/%s/tar.gz/%s" % (repo, sha), headers=h), timeout=120).read()))
+                for m in t.getmembers():
+                    p = m.name.split("/", 1)
+                    if len(p) < 2 or not p[1] or ".." in p[1] or not (m.isfile() or m.isdir()):
+                        continue
+                    d = os.path.join(cur, p[1])
+                    if m.isdir():
+                        os.makedirs(d, exist_ok=True)
+                    else:
+                        os.makedirs(os.path.dirname(d), exist_ok=True)
+                        open(d, "wb").write(t.extractfile(m).read())
+                open(cur + "/.sha", "w").write(sha)
+            except Exception as e:
+                print("Esperando para bajar la app:", e, flush=True)
+                time.sleep(30)
+        os.execvp("python", ["python", cur + "/server/launcher.py"])
+
+volumes:
+  sol-data:

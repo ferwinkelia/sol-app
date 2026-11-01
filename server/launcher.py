@@ -8,7 +8,6 @@ import hashlib
 import io
 import json
 import os
-import py_compile
 import shutil
 import subprocess
 import sys
@@ -76,7 +75,8 @@ def valida(d):
         if not (os.path.isfile(d + "/server/server.py") and os.path.isfile(d + "/app/mamaderas.html")):
             return False
         for f in ("server/server.py", "server/launcher.py"):
-            py_compile.compile(os.path.join(d, f), doraise=True, cfile=os.devnull)
+            ruta = os.path.join(d, f)
+            compile(open(ruta, encoding="utf-8").read(), ruta, "exec")
         return True
     except Exception as e:
         log("versión inválida:", e)
@@ -127,9 +127,12 @@ def main():
             sha = ultimo_sha()
             log("primera instalación, bajando", sha[:7])
             bajar(sha, CUR)
+            if valida(CUR):
+                break
         except Exception as e:
-            log("no se pudo bajar la app:", e, "- reintento en 30 s")
-            time.sleep(30)
+            log("no se pudo bajar la app:", e)
+        log("reintento en 60 s")
+        time.sleep(60)
     lanzador = huella(CUR + "/server/launcher.py")
     p = arrancar()
     proxima = time.time() + 30

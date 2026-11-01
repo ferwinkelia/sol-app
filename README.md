@@ -9,3 +9,5 @@ App familiar para registrar tomas de mamadera, pañales, medicación y controles
 - `docker-compose.yml`: stack para Portainer. Completar `APP_PIN` y `API_TOKEN` antes de desplegar.
 
 El código no contiene datos personales: los registros quedan solo en el servidor.
+
+Actualización automática: el servidor revisa este repositorio cada 5 minutos.

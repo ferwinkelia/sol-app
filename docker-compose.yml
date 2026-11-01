@@ -1,14 +1,14 @@
 # Sol — stack para Portainer
-# Pegar este contenido en Portainer › Stacks › Add stack › Web editor.
-# Antes de desplegar, cambiá APP_PIN y API_TOKEN si querés otros valores.
+# En Portainer: Stacks › Add stack › Repository (este repositorio, archivo docker-compose.yml).
+# Cargar APP_PIN y API_TOKEN en "Environment variables" del stack.
 services:
   sol:
     image: python:3.13-slim
     container_name: sol-app
     restart: unless-stopped
     environment:
-      APP_PIN: "CAMBIAR"
-      API_TOKEN: "CAMBIAR"
+      APP_PIN: "${APP_PIN}"
+      API_TOKEN: "${API_TOKEN}"
       TZ_OFFSET: "-3"
       PORT: "8090"
       GITHUB_REPO: "ferwinkelia/sol-app"

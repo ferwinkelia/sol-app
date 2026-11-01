@@ -680,6 +680,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
       if(downloads) h+='<div class="row"><span>Planilla de tomas y pañales</span><button class="ghost" style="min-height:42px;color:var(--accent)" data-act="csv">Descargar CSV</button></div>'+
         '<div class="row"><span>Copia completa de todo</span><button class="ghost" style="min-height:42px;color:var(--accent)" data-act="backup">Descargar copia</button></div>';
       if(srv&&canWrite) h+='<div class="row"><span>Importar una copia</span><label class="filebtn">Elegir archivo<input type="file" id="fImport" accept=".json,application/json"></label></div><p class="hint">Agrega los registros de la copia que no estén cargados. No borra nada.</p>';
+      if(srv&&window.claude.desconectarTodo) h+='<div class="row"><span>Desconectar todos los celulares</span><button class="ghost" style="min-height:42px;color:var(--danger)" data-act="desconectar">Desconectar</button></div><p class="hint">Usalo si perdés un celular o cambiás el PIN. Después cada uno vuelve a entrar con el PIN.</p>';
       h+='</section>';
     }
     return h+'</div>';
@@ -870,6 +871,9 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
         saveCfg({precios:lista},'Precios guardados').then(()=>render()); break; }
       case 'csv': if(downloads) csv(); break;
       case 'backup': if(downloads) backupJson(); break;
+      case 'desconectar':
+        sheet('<h2>¿Desconectar todos los celulares?</h2><p class="sub" style="margin:0">Este celular y los demás van a tener que volver a poner el PIN.</p><div class="foot"><button class="ghost" id="dNo">No</button><button class="danger" id="dYes">Sí, desconectar</button></div>');
+        $('dNo').onclick=close; $('dYes').onclick=()=>window.claude.desconectarTodo().catch(()=>toast('No se pudo desconectar.')); break;
       case 'saludTab': saludTab=b.dataset.v; render(); break;
       case 'gVar': gVar=b.dataset.v; render(); break;
       case 'newMed': openMed(null); break;

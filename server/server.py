@@ -5,6 +5,7 @@ Solo biblioteca estándar de Python 3.11+. Guarda documentos JSON en SQLite
 colecciones (tomas, panales, medicamentos, dosis, controles, config) de
 documentos con id. Los celulares sincronizan con /api/sync (long-poll).
 """
+import hashlib
 import hmac
 import json
 import os
@@ -35,7 +36,11 @@ if not APP_PIN:
 NAME_RE = re.compile(r"^[A-Za-z0-9_.:-]{1,80}$")
 MAX_BODY = 600_000
 cond = threading.Condition()
-fallos = {}
+fallos = {}            # ip -> [instantes de intentos fallidos]
+fallos_global = []     # todos los intentos fallidos de PIN, de cualquier lugar
+bloqueo_hasta = [0.0]  # bloqueo general del ingreso con PIN
+POR_IP, VENTANA_IP = 5, 900          # 5 fallos por conexión cada 15 min
+GLOBAL, VENTANA_G, BLOQUEO_G = 20, 3600, 3600  # 20 fallos en total en 1 h -> 1 h sin ingreso con PIN
 
 
 # ---------------- base de datos ----------------
@@ -52,6 +57,7 @@ def iniciar_db():
         PRIMARY KEY(col, id))""")
     db.execute("CREATE INDEX IF NOT EXISTS idx_seq ON docs(seq)")
     db.execute("CREATE TABLE IF NOT EXISTS meta(k TEXT PRIMARY KEY, v INTEGER)")
+    db.execute("CREATE TABLE IF NOT EXISTS celulares(hash TEXT PRIMARY KEY, nombre TEXT, creado INTEGER, ultimo INTEGER)")
     db.execute("INSERT OR IGNORE INTO meta VALUES('seq', 0)")
     db.commit()
 
@@ -97,6 +103,30 @@ def cambios_desde(since):
             rows = db.execute("SELECT col,id,data FROM docs WHERE seq>? ORDER BY seq", (since,)).fetchall()
         s = seq_actual()
     return s, [{"col": c, "id": i, "data": json.loads(d) if d is not None else None} for c, i, d in rows]
+
+
+def hash_token(t):
+    return hashlib.sha256(t.encode()).hexdigest()
+
+
+def token_valido(t):
+    if not t or len(t) < 30:
+        return False
+    h = hash_token(t)
+    with cond:
+        r = db.execute("SELECT 1 FROM celulares WHERE hash=?", (h,)).fetchone()
+        if r:
+            db.execute("UPDATE celulares SET ultimo=? WHERE hash=?", (ahora(), h))
+            db.commit()
+    return bool(r)
+
+
+def nuevo_celular(nombre):
+    t = secrets.token_urlsafe(32)
+    with cond:
+        db.execute("INSERT INTO celulares VALUES(?,?,?,?)", (hash_token(t), nombre[:60], ahora(), ahora()))
+        db.commit()
+    return t
 
 
 def nuevo_id():
@@ -230,6 +260,12 @@ class App(BaseHTTPRequestHandler):
     server_version = "Sol"
     protocol_version = "HTTP/1.1"
 
+    def handle(self):
+        try:
+            super().handle()
+        except (BrokenPipeError, ConnectionResetError):
+            pass  # el celular cerró la conexión (por ejemplo, al bloquear la pantalla)
+
     def log_message(self, fmt, *args):
         if os.environ.get("LOG") == "1":
             super().log_message(fmt, *args)
@@ -244,34 +280,82 @@ class App(BaseHTTPRequestHandler):
         self.send_header("Content-Type", tipo)
         self.send_header("Content-Length", str(len(datos)))
         self.send_header("Cache-Control", cache)
+        if code >= 400:
+            self.send_header("Connection", "close")
+            self.close_connection = True
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Content-Security-Policy", "frame-ancestors 'none'")
         self.end_headers()
         if self.command != "HEAD":
             self.wfile.write(datos)
 
+    def fallo(self, ip, global_tambien):
+        t = time.time()
+        fallos.setdefault(ip, []).append(t)
+        if global_tambien:
+            fallos_global[:] = [x for x in fallos_global if t - x < VENTANA_G] + [t]
+            if len(fallos_global) >= GLOBAL:
+                bloqueo_hasta[0] = t + BLOQUEO_G
+                fallos_global.clear()
+                print("Demasiados intentos de PIN: ingreso con PIN bloqueado por 1 hora", flush=True)
+        time.sleep(0.8)
+
+    def ip_bloqueada(self, ip):
+        t = time.time()
+        fallos[ip] = [x for x in fallos.get(ip, []) if t - x < VENTANA_IP]
+        return len(fallos[ip]) >= POR_IP
+
     def autorizado(self):
-        ip, t = self.ip(), time.time()
-        lista = [x for x in fallos.get(ip, []) if t - x < 900]
-        fallos[ip] = lista
-        if len(lista) >= 10:
+        """Celulares: clave propia (X-Device). Home Assistant y Siri: Bearer API_TOKEN."""
+        ip = self.ip()
+        if self.ip_bloqueada(ip):
             return None
         auth = self.headers.get("Authorization", "")
-        pin = self.headers.get("X-PIN", "")
-        ok = (API_TOKEN and auth.startswith("Bearer ") and hmac.compare_digest(auth[7:].strip(), API_TOKEN)) or \
-             (pin and hmac.compare_digest(pin.strip(), APP_PIN))
-        if not ok:
-            lista.append(t)
-            time.sleep(0.6)
-        return bool(ok)
+        dev = self.headers.get("X-Device", "").strip()
+        if API_TOKEN and auth.startswith("Bearer ") and hmac.compare_digest(auth[7:].strip(), API_TOKEN):
+            return True
+        if dev and token_valido(dev):
+            return True
+        self.fallo(ip, False)
+        return False
+
+    def login(self):
+        ip = self.ip()
+        if bloqueo_hasta[0] > time.time():
+            return self.responder(429, {"error": "Hubo demasiados intentos. El ingreso con PIN está pausado; probá en una hora."})
+        if self.ip_bloqueada(ip):
+            return self.responder(429, {"error": "Demasiados intentos. Esperá 15 minutos."})
+        try:
+            d = self.cuerpo()
+        except (ValueError, json.JSONDecodeError):
+            d = {}
+        pin = str(d.get("pin", "")).strip()
+        if not pin or not hmac.compare_digest(pin, APP_PIN):
+            self.fallo(ip, True)
+            return self.responder(401, {"error": "PIN incorrecto"})
+        fallos.pop(ip, None)
+        nombre = str(d.get("nombre") or self.headers.get("User-Agent", ""))[:60]
+        return self.responder(200, {"token": nuevo_celular(nombre)})
+
+    def leer_cuerpo(self):
+        """Lee siempre el cuerpo completo del pedido, se use o no."""
+        if hasattr(self, "_raw"):
+            return
+        n = int(self.headers.get("Content-Length") or 0)
+        if n > 20_000_000:
+            self._raw = None
+            return
+        self._raw = self.rfile.read(n) if n > 0 else b""
 
     def cuerpo(self):
-        n = int(self.headers.get("Content-Length") or 0)
-        if n > MAX_BODY:
+        self.leer_cuerpo()
+        if self._raw is None or len(self._raw) > MAX_BODY:
             raise ValueError("Pedido demasiado grande")
-        if not n:
+        if not self._raw:
             return {}
-        d = json.loads(self.rfile.read(n) or b"{}")
+        d = json.loads(self._raw or b"{}")
         if not isinstance(d, dict):
             raise ValueError("Se esperaba un objeto JSON")
         return d
@@ -306,13 +390,19 @@ class App(BaseHTTPRequestHandler):
         self.api("DELETE", urlparse(self.path))
 
     def api(self, metodo, u):
+        self.__dict__.pop("_raw", None)  # la conexión se reutiliza: cada pedido lee su propio cuerpo
+        self.leer_cuerpo()
+        if self._raw is None:
+            return self.responder(413, {"error": "Pedido demasiado grande"})
         if u.path == "/api/salud":
             return self.responder(200, {"ok": True, "version": VERSION})
+        if u.path == "/api/login" and metodo == "POST":
+            return self.login()
         ok = self.autorizado()
         if ok is None:
             return self.responder(429, {"error": "Demasiados intentos. Esperá 15 minutos."})
         if not ok:
-            return self.responder(401, {"error": "PIN incorrecto"})
+            return self.responder(401, {"error": "Este celular no está autorizado"})
         q = parse_qs(u.query)
         partes = u.path.strip("/").split("/")[1:]
         try:
@@ -368,6 +458,11 @@ class App(BaseHTTPRequestHandler):
                 for c in ch:
                     out.setdefault(c["col"], []).append(dict(c["data"], id=c["id"]))
                 return self.responder(200, {"version": 1, "exportado": iso(ahora()), "colecciones": out})
+            if partes == ["desconectar"] and metodo == "POST":
+                with cond:
+                    db.execute("DELETE FROM celulares")
+                    db.commit()
+                return self.responder(200, {"ok": True})
             if partes == ["estado"] and metodo == "GET":
                 return self.responder(200, estado())
             if len(partes) == 1 and partes[0] in ("empezo", "termino", "panal") and metodo == "POST":
@@ -380,10 +475,10 @@ class App(BaseHTTPRequestHandler):
             return self.responder(400, {"error": str(e)})
 
     def cuerpo_grande(self):
-        n = int(self.headers.get("Content-Length") or 0)
-        if n > 20_000_000:
+        self.leer_cuerpo()
+        if self._raw is None:
             raise ValueError("Archivo demasiado grande")
-        d = json.loads(self.rfile.read(n) or b"{}")
+        d = json.loads(self._raw or b"{}")
         if not isinstance(d, dict):
             raise ValueError("Archivo inválido")
         return d

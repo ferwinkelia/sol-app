@@ -3,9 +3,17 @@
    los datos se guardan en la mini PC y se sincronizan entre celulares. */
 (function () {
   'use strict';
-  const KEY = 'sol_pin';
-  let pin = '';
-  try { pin = localStorage.getItem(KEY) || ''; } catch (e) {}
+  const KEY = 'sol_token', OLD = 'sol_pin';
+  let token = '', viejoPin = '';
+  try { token = localStorage.getItem(KEY) || ''; viejoPin = localStorage.getItem(OLD) || ''; } catch (e) {}
+  const guardar = t => { token = t; try { localStorage.setItem(KEY, t); localStorage.removeItem(OLD); } catch (e) {} };
+  const nombreCel = () => { const u = navigator.userAgent; return /iPhone/.test(u) ? 'iPhone' : /Android/.test(u) ? 'Android' : /Mac/.test(u) ? 'Mac' : 'Navegador'; };
+  async function login(pin) {
+    const r = await fetch('api/login', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin, nombre: nombreCel() }) });
+    let d = {}; try { d = await r.json(); } catch (e) {}
+    if (!r.ok) throw { code: 'auth', message: d.error || 'No se pudo entrar' };
+    guardar(d.token);
+  }
   const cache = {};            // colección -> Map(id -> data)
   const listeners = new Set();
   let seq = 0, ready = null, version = null;
@@ -20,15 +28,15 @@
   async function api(method, path, body) {
     const r = await fetch('api/' + path, {
       method, cache: 'no-store',
-      headers: { 'X-PIN': pin, 'Content-Type': 'application/json' },
+      headers: { 'X-Device': token, 'Content-Type': 'application/json' },
       body: body === undefined ? undefined : JSON.stringify(body)
     });
     let d = {};
     try { d = await r.json(); } catch (e) {}
     if (r.status === 401) {
       try { localStorage.removeItem(KEY); } catch (e) {}
-      pin = '';
-      throw { code: 'auth', message: d.error || 'PIN incorrecto' };
+      token = '';
+      throw { code: 'auth', message: d.error || 'Este celular no está autorizado' };
     }
     if (r.status === 429) throw { code: 'auth', message: d.error || 'Demasiados intentos' };
     if (!r.ok) throw { code: r.status === 400 || r.status === 404 ? 'invalid_argument' : 'unavailable', message: d.error || ('Error ' + r.status) };
@@ -77,19 +85,20 @@
       setTimeout(() => { const i = document.getElementById('solPin'); if (i) i.focus(); }, 50);
       o.querySelector('form').onsubmit = async ev => {
         ev.preventDefault();
-        pin = document.getElementById('solPin').value.trim();
+        const btn = o.querySelector('button'); btn.disabled = true;
         try {
+          await login(document.getElementById('solPin').value.trim());
           const d = await api('GET', 'sync?since=0');
-          try { localStorage.setItem(KEY, pin); } catch (e) {}
           o.remove(); res(d);
-        } catch (e) { document.getElementById('solErr').textContent = e.message || 'No se pudo entrar'; }
+        } catch (e) { document.getElementById('solErr').textContent = e.message || 'No se pudo entrar'; btn.disabled = false; }
       };
     });
   }
 
   async function init() {
     let d = null;
-    if (pin) { try { d = await api('GET', 'sync?since=0'); } catch (e) { d = null; } }
+    if (!token && viejoPin) { try { await login(viejoPin); } catch (e) {} }
+    if (token) { try { d = await api('GET', 'sync?since=0'); } catch (e) { d = null; } }
     if (!d) d = await pedirPin();
     version = d.version || null;
     apply(d.changes); seq = d.seq;
@@ -160,6 +169,7 @@
   };
   window.claude = {
     servidor: true,
+    desconectarTodo: async () => { await api('POST', 'desconectar', {}); try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); },
     importar: async (json, pisar) => api('POST', 'import', { colecciones: json.colecciones || json, pisar: !!pisar }),
     use: async name => name === 'db' ? (ready || (ready = init())) : name === 'user' ? USER : name === 'downloads' ? DOWNLOADS : null
   };

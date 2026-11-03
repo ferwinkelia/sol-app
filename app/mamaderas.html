@@ -1,7 +1,7 @@
 <title>Mamaderas de Sol</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rubik:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rubik:wght@500;600;700&family=Great+Vibes&display=swap">
 <style>
 /* Layout: una columna para celular; foto con corte curvo, tarjetas blancas, menú inferior fijo */
 :root{
@@ -10,7 +10,7 @@
   --stop:#C62F25; --stop-ink:#FFFFFF; --hero:#D5E0E7; --pis-bg:#FBF0C4; --pis:#7A5D00; --caca-bg:#F2E3D4; --caca:#6E4220;
   --danger:#B3392F; --bar:#2C6A9E; --bar2:#B9C3CC; --overlay:rgba(10,20,28,.45); --toast-bg:#1B2A35; --toast-ink:#FFFFFF;
   --m-bg:#D7F0E4; --m-ink:#1B5139; --m-chip:#FFFFFF; --m-acc:#2B7A58; --m-acc-ink:#FFFFFF;
-  --p-bg:#E3E2F8; --p-ink:#3A3580; --p-chip:#FFFFFF; --p-acc:#4A4596; --p-acc-ink:#FFFFFF;
+  --p-bg:#E3E2F8; --p-ink:#3A3580; --p-chip:#FFFFFF; --p-acc:#4A4596; --p-acc-ink:#FFFFFF; --name:#A85F80; --m-box:#C6E8D7; --p-box:#D3D1F2;
   --display:"Rubik", system-ui, sans-serif; --body:"Atkinson Hyperlegible", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]):not([data-app-theme="light"]){
@@ -19,14 +19,14 @@
   --stop:#D9443A; --stop-ink:#FFFFFF; --hero:#1E2C37; --pis-bg:#3A3014; --pis:#EBC64E; --caca-bg:#36261A; --caca:#DDA97B;
   --danger:#F08378; --bar:#7DB3E0; --bar2:#4A5A68; --overlay:rgba(0,0,0,.6); --toast-bg:#E4EDF3; --toast-ink:#0E151B;
   --m-bg:#173328; --m-ink:#A9E2C6; --m-chip:#1F4536; --m-acc:#4FB38A; --m-acc-ink:#0C1E16;
-  --p-bg:#25233F; --p-ink:#C9C6F5; --p-chip:#33305A; --p-acc:#8E89D6; --p-acc-ink:#12102A; color-scheme:dark}}
+  --p-bg:#25233F; --p-ink:#C9C6F5; --p-chip:#33305A; --p-acc:#8E89D6; --p-acc-ink:#12102A; --name:#DDA3BF; --m-box:#1F4536; --p-box:#33305A; color-scheme:dark}}
 :root[data-theme="dark"]:not([data-app-theme="light"]), :root[data-app-theme="dark"]{
   --bg:#0E151B; --surface:#17222B; --surface2:#0E151B; --ink:#E4EDF3; --muted:#90A4B4; --line:#344756; --line2:#283844;
   --accent:#7DB3E0; --accent-ink:#0E151B; --accent-soft:#1E3446; --warm:#EDA45E; --warm-ink:#1B1208; --warm-soft:#3A2A1A; --warm-text:#EDA45E;
   --stop:#D9443A; --stop-ink:#FFFFFF; --hero:#1E2C37; --pis-bg:#3A3014; --pis:#EBC64E; --caca-bg:#36261A; --caca:#DDA97B;
   --danger:#F08378; --bar:#7DB3E0; --bar2:#4A5A68; --overlay:rgba(0,0,0,.6); --toast-bg:#E4EDF3; --toast-ink:#0E151B;
   --m-bg:#173328; --m-ink:#A9E2C6; --m-chip:#1F4536; --m-acc:#4FB38A; --m-acc-ink:#0C1E16;
-  --p-bg:#25233F; --p-ink:#C9C6F5; --p-chip:#33305A; --p-acc:#8E89D6; --p-acc-ink:#12102A; color-scheme:dark}
+  --p-bg:#25233F; --p-ink:#C9C6F5; --p-chip:#33305A; --p-acc:#8E89D6; --p-acc-ink:#12102A; --name:#DDA3BF; --m-box:#1F4536; --p-box:#33305A; color-scheme:dark}
 :root[data-app-theme="light"]{color-scheme:light}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 *{box-sizing:border-box}
@@ -45,7 +45,7 @@ h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance}
 .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .homepage{display:flex;flex-direction:column;min-height:calc(100vh - 84px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));min-height:calc(100dvh - 84px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px))}
 .homepage .hero{flex:1 0 auto;height:auto;min-height:clamp(92px,15vh,170px);width:100%}
-.homepage .wrap{width:100%;padding-bottom:8px}
+.homepage .wrap{width:100%;padding-bottom:8px;flex:1}
 .hero .ph{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);font-weight:700;font-size:14px;background:none;border:none}
 .hero .gear{position:absolute;top:12px;right:max(16px,env(safe-area-inset-right,0px));width:44px;height:44px;border-radius:50%;border:none;background:var(--surface);opacity:.92;display:grid;place-items:center;color:var(--ink)}
 .namerow{display:flex;align-items:baseline;gap:10px;padding:2px 4px 0;flex-wrap:wrap}
@@ -55,6 +55,35 @@ h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance}
 .hero .namechip{position:absolute;left:max(24px,env(safe-area-inset-left,0px));bottom:16px;background:var(--surface);color:var(--ink);border-radius:18px;padding:5px 14px 6px;display:flex;align-items:baseline;gap:8px}
 .hero .namechip h1{font-size:22px;line-height:1.1}
 .hero .namechip span{font-size:13px;color:var(--muted)}
+/* Encabezado: franja, foto redonda y nombre en cursiva */
+.head{position:relative;max-width:600px;margin:0 auto;width:100%;--hh:clamp(176px,25vh,240px);height:var(--hh);flex:none}
+.head .band{position:absolute;inset:0 0 34px 0;background:var(--hero);border-radius:0 0 160px 0}
+.head .av{position:absolute;left:max(18px,env(safe-area-inset-left,0px));bottom:0;width:calc(var(--hh) - 66px);height:calc(var(--hh) - 66px);border-radius:50%;border:5px solid var(--bg);background:var(--line2);overflow:hidden;display:grid;place-items:center;padding:0;color:var(--muted)}
+.head .av img{width:100%;height:100%;object-fit:cover;display:block}
+.head .av span{font-size:12px;font-weight:700}
+.head .nm{position:absolute;left:calc(max(18px,env(safe-area-inset-left,0px)) + var(--hh) - 50px);right:12px;bottom:18px;display:flex;flex-direction:column;align-items:flex-start}
+.head .nm h1{font-family:"Great Vibes",cursive;font-weight:400;font-size:clamp(52px,14vw,66px);line-height:.95;color:var(--name);margin:0 0 0 -4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.head .nm span{font-size:13px;letter-spacing:.06em;color:var(--muted);padding-left:14px;margin-top:2px}
+.head .gear{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:44px;height:44px;border-radius:50%;border:none;background:var(--line2);display:grid;place-items:center;color:var(--ink)}
+.sbox{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;border-radius:16px;padding:7px 12px;font-variant-numeric:tabular-nums}
+.mcard .sbox{background:var(--m-box)} .pcard .sbox{background:var(--p-box)}
+.sbox>div{display:flex;flex-direction:column;min-width:0}
+.sbox b{font-family:var(--display);font-weight:600;font-size:19px;line-height:1.15}
+.sbox span{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scrollhint{text-align:center;font-size:12px;color:var(--muted);padding:2px 0 4px;margin-top:auto}
+/* Historial en Inicio */
+.hhead{display:flex;align-items:center;gap:8px;position:relative;padding-top:14px}
+.hhead h2{flex:1;font-size:22px}
+.smallbtn{border:none;border-radius:999px;background:var(--surface);color:var(--accent);min-height:38px;padding:0 14px;font-weight:700;font-size:13px}
+.iconbtn{width:38px;height:38px;border:none;border-radius:50%;background:var(--line2);color:var(--ink);display:grid;place-items:center;padding:0}
+.iconbtn.on{background:var(--accent);color:var(--accent-ink)}
+.fmenu{position:absolute;top:58px;right:0;z-index:5;width:180px;background:var(--surface);border:1px solid var(--line2);border-radius:14px;padding:4px;display:flex;flex-direction:column;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.fmenu button{border:none;background:transparent;color:var(--ink);border-radius:10px;min-height:42px;padding:0 12px;text-align:left;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.fmenu button[aria-checked="true"]{background:var(--line2);font-weight:700}
+.morebtn{border:none;border-radius:999px;background:var(--surface);color:var(--accent);min-height:44px;font-weight:700;font-size:14px}
+.medrow{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line2);padding-right:10px}
+.medrow:last-child{border-bottom:none}
+.medrow .item{border-bottom:none;flex:1;min-width:0}
 /* Inicio en pastel */
 .home{gap:8px}
 .set>.fld{flex:none}
@@ -145,7 +174,9 @@ h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance}
 .item{width:100%;border:none;border-bottom:1px solid var(--line2);background:transparent;text-align:left;display:flex;align-items:center;gap:12px;padding:11px 14px}
 .item:last-child{border-bottom:none}
 .item .ib{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--accent-soft);color:var(--accent)}
-.item.p .ib{background:var(--surface2);color:var(--muted);border:1px solid var(--line2)}
+.item .ib{background:var(--m-chip);color:var(--m-ink)}
+.item.p .ib{background:var(--p-chip);color:var(--p-ink)}
+#historial .list{border:none}
 .item .mid{flex:1;min-width:0;display:flex;flex-direction:column}
 .item .mid b{font-size:15px}
 .item .ml{font-family:var(--display);font-weight:600;font-size:17px;white-space:nowrap}
@@ -223,7 +254,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
 .chart text{font-size:10px;fill:var(--muted);font-family:var(--body)}
 /* Menú */
 .nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line2);padding:6px max(10px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));z-index:15}
-.nav .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+.nav .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px}
 .nav button{border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;color:var(--muted);font-size:11.5px;min-height:52px}
 .nav button[aria-current="page"]{color:var(--accent);font-weight:700}
 
@@ -252,7 +283,6 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
 
 <nav class="nav" aria-label="Secciones"><div class="in">
   <button data-act="tab" data-tab="inicio" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Inicio</button>
-  <button data-act="tab" data-tab="historial"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Historial</button>
   <button data-act="tab" data-tab="salud"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M9 11h6M12 8v6"/></svg>Salud</button>
   <button data-act="tab" data-tab="resumen"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11M10 20V5M16 20v-7M2 20h20"/></svg>Resumen</button>
   <button data-act="tab" data-tab="ajustes"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Ajustes</button>
@@ -275,7 +305,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
   let db=null,colT=null,colP=null,cfgRef=null,fotoRef=null,downloads=null,canWrite=true;
   let tomas=[],panales=[],meds=[],dosis=[],controles=[],cfg=Object.assign({},DEF),foto=null,loadedT=false;
   let colM=null,colD=null,colC=null,saludTab='med',gVar='peso';
-  let tab='inicio',filtro='todo',mes=null,tick=null;
+  let tab='inicio',filtro='todo',mes=null,tick=null,fOpen=false,histDias=2;
 
   // ---------- utilidades ----------
   const pad=n=>String(n).padStart(2,'0');
@@ -351,7 +381,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
     document.querySelectorAll('.nav [data-tab]').forEach(b=>{ if(b.dataset.tab===tab) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
     const v=$('view');
     if(!db){ v.innerHTML='<div class="wrap" style="padding-top:24px"><p class="empty">Abrí esta página desde Claude con tu cuenta iniciada para ver y cargar las tomas.</p></div>'; return; }
-    v.innerHTML = tab==='inicio'?vInicio() : tab==='historial'?vHistorial() : tab==='salud'?vSalud() : tab==='resumen'?vResumen() : vAjustes();
+    v.innerHTML = tab==='inicio'?vInicio() : tab==='salud'?vSalud() : tab==='resumen'?vResumen() : vAjustes();
     renderNap(); setupTimer();
   }
   function rerenderSoft(){
@@ -362,17 +392,17 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
 
   function hero(){
     const e=edad();
-    const img=foto?'<img src="'+foto+'" alt="Foto de '+esc(cfg.nombre)+'" style="object-position:50% '+(Number(cfg.fotoPos)||35)+'%">'
-      :'<button class="ph" data-act="tab" data-tab="ajustes">'+IC.camera+'<span>Agregar foto</span></button>';
-    return '<div class="hero">'+img+'<div class="namechip"><h1>'+esc(cfg.nombre)+'</h1>'+(e?'<span>'+e+'</span>':'')+'</div><button class="gear" data-act="tab" data-tab="ajustes" aria-label="Ajustes">'+IC.gear+'</button></div>';
+    const img=foto?'<img src="'+foto+'" alt="Foto de '+esc(cfg.nombre)+'" style="object-position:50% '+(Number(cfg.fotoPos)||35)+'%">':'<span>Agregar foto</span>';
+    return '<div class="head"><div class="band"></div><button class="av" data-act="tab" data-tab="ajustes" aria-label="Cambiar la foto en Ajustes">'+img+'</button><div class="nm"><h1>'+esc(cfg.nombre)+'</h1>'+(e?'<span>'+e+'</span>':'')+'</div><button class="gear" data-act="tab" data-tab="ajustes" aria-label="Ajustes">'+IC.gear+'</button></div>';
   }
 
   function vInicio(){
     let h='<div class="homepage">'+hero()+'<div class="wrap home" style="padding-top:10px">';
     h+='<div id="nap" class="nap" role="status" hidden></div>'+medStrip();
     if(!canWrite) h+='<p class="hint">Podés ver el registro, pero tu acceso no permite cargar datos. Pedile a Fer que te comparta la página como Editor.</p>';
-    return h+cardToma()+cardPanal()+'</div></div>';
+    return h+cardToma()+cardPanal()+'<div class="scrollhint">Deslizá hacia abajo para ver el historial</div></div></div>'+vHistorial();
   }
+  const sbox=vals=>'<div class="sbox">'+vals.map(([v,l])=>'<div><b>'+v+'</b><span>'+l+'</span></div>').join('')+'</div>';
 
   function cardToma(){
     const a=active(), today=ymd(Date.now());
@@ -384,9 +414,8 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
     const hoy=tomas.filter(t=>ymd(t.inicio)===today), conMl=hoy.filter(t=>tomado(t)!=null);
     const ml=sum(conMl.map(tomado)), ld=lastDone();
     let h='<section class="mcard"><div class="hrow"><span class="bd">'+IC.bottle(22)+'</span><div class="tt"><h2>Mamadera</h2><span class="line num">'+
-      (ld?'Última '+hhmm(ld.inicio)+(tomado(ld)!=null?' · '+tomado(ld)+' ml':''):'Todavía no hay tomas')+'</span></div>'+
-      (ld?'<div class="ago"><b class="num">'+dur(mins(ld.inicio,Date.now()))+'</b><span>desde la última</span></div>':'')+'</div>';
-    h+='<div class="line num">Hoy <b>'+ml+' ml</b> · <b>'+hoy.length+'</b> '+(hoy.length===1?'toma':'tomas')+(conMl.length?' · prom. <b>'+Math.round(ml/conMl.length)+' ml</b>':'')+'</div>';
+      (ld?'Última hace <b>'+dur(mins(ld.inicio,Date.now()))+'</b>'+(tomado(ld)!=null?' · tomó '+tomado(ld)+' ml':''):'Todavía no hay tomas')+'</span></div></div>';
+    h+=sbox([[ml,'ml hoy'],[hoy.length,hoy.length===1?'toma':'tomas'],[conMl.length?Math.round(ml/conMl.length):'—','promedio'],[sum(hoy.map(sobro)),'ml sobró']]);
     if(canWrite){
       h+='<button class="pillbtn" data-act="start">Empezó a tomar</button>';
       const canRes=ld && Date.now()-ld.fin < (Number(cfg.retomarHoras)||3)*3600e3;
@@ -399,8 +428,9 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
   const tagsHtml=p=>'<span class="tags">'+(p.pis?'<span class="tag pis">Pis</span>':'')+(p.caca?'<span class="tag caca">Caca</span>':'')+'</span>';
   function cardPanal(){
     const today=ymd(Date.now()), ph=panales.filter(p=>ymd(p.hora)===today), u=panales[0];
-    let h='<section class="pcard"><div class="hrow"><span class="bd">'+IC.diaper(22)+'</span><div class="tt"><h2>Pañal</h2><span class="line num">Hoy <b>'+ph.length+'</b> · '+ph.filter(p=>p.pis).length+' pis · '+ph.filter(p=>p.caca).length+' caca</span></div>'+
-      (u?'<div class="ago"><b class="num">'+dur(mins(u.hora,Date.now()))+'</b><span>último: '+tipoTxt(u)+'</span></div>':'')+'</div>';
+    const ay=ymd(Date.now()-864e5), pa=panales.filter(p=>ymd(p.hora)===ay);
+    let h='<section class="pcard"><div class="hrow"><span class="bd">'+IC.diaper(22)+'</span><div class="tt"><h2>Pañal</h2><span class="line num">'+(u?'Último hace <b>'+dur(mins(u.hora,Date.now()))+'</b> · '+tipoTxt(u):'Todavía no hay cambios')+'</span></div></div>';
+    h+=sbox([[ph.length,'cambios'],[ph.filter(p=>p.caca).length,'con caca'],[ph.filter(p=>p.pis).length,'con pis'],[pa.length,'ayer']]);
     if(canWrite) h+='<div class="grid g3"><button class="chipbtn" data-act="panal" data-pis="1" data-caca="0">Pis</button><button class="chipbtn" data-act="panal" data-pis="0" data-caca="1">Caca</button><button class="chipbtn both" data-act="panal" data-pis="1" data-caca="1">Los dos</button></div>';
     return h+'</section>';
   }
@@ -498,14 +528,14 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
         h+='<div class="med'+(st.due?' due':'')+'"><button class="info" data-act="editMed" data-id="'+m.id+'" aria-label="Editar '+esc(m.nombre)+'"><b>'+esc(m.nombre)+'</b><span class="sub">'+esc(m.dosis||'')+(m.dosis?' · ':'')+freqTxt(m)+'</span><span class="st num">'+st.txt+(st.last?' · última '+(ymd(st.last.hora)===ymd(Date.now())?'':'ayer ')+hhmm(st.last.hora):'')+'</span></button>'+
           (canWrite?'<button class="give'+(st.done?' done':'')+'" data-act="darMed" data-id="'+m.id+'">Le di</button>':'')+'</div>'; });
       if(canWrite) h+='<button class="ghost" style="color:var(--accent)" data-act="newMed">+ Agregar medicamento</button>';
+      const term=meds.filter(m=>!activeMed(m));
+      if(term.length) h+='<div class="dayhead"><h2>Terminados</h2></div><div class="list">'+term.map(m=>'<div class="medrow"><button class="item" data-act="editMed" data-id="'+m.id+'"><span class="mid"><b>'+esc(m.nombre)+'</b><span class="sub">'+esc(m.dosis||'')+(m.dosis?' · ':'')+freqTxt(m)+'</span></span></button>'+(canWrite?'<button class="link acc" data-act="reMed" data-id="'+m.id+'">Reactivar</button>':'')+'</div>').join('')+'</div>';
       const ult=dosis.slice().sort((a,b)=>b.hora-a.hora).slice(0,30);
       if(ult.length){
         h+='<div class="dayhead"><h2>Últimas dosis</h2><span>tocá una para corregirla</span></div><div class="list">';
         ult.forEach(d=>{ h+='<button class="item" data-act="editDosis" data-id="'+d.id+'"><span class="mid"><b class="num">'+dayLabel(ymd(d.hora))+' · '+hhmm(d.hora)+'</b><span class="sub">'+esc(d.nombre)+(d.dosis?' · '+esc(d.dosis):'')+(d.nota?' · '+esc(d.nota):'')+'</span></span></button>'; });
         h+='</div>';
       }
-      const term=meds.filter(m=>!activeMed(m));
-      if(term.length) h+='<div class="dayhead"><h2>Terminados</h2></div><div class="list">'+term.map(m=>'<button class="item" data-act="editMed" data-id="'+m.id+'"><span class="mid"><b>'+esc(m.nombre)+'</b><span class="sub">'+esc(m.dosis||'')+' · '+freqTxt(m)+'</span></span></button>').join('')+'</div>';
       h+='<p class="hint">La app solo registra lo que ustedes le dan, según la indicación del pediatra. No calcula dosis.</p>';
       return h+'</div>';
     }
@@ -593,15 +623,18 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
 
   // ---------- historial ----------
   function vHistorial(){
-    let h='<div class="wrap top"><div class="row"><h1>Historial</h1>'+(canWrite?'<button class="ghost" style="min-height:42px;color:var(--accent)" data-act="manualChoose">+ Cargar a mano</button>':'')+'</div>';
-    h+='<div class="seg" role="group" aria-label="Filtrar">'+[['todo','Todo'],['tomas','Tomas'],['panales','Pañales']].map(([k,l])=>'<button data-act="filtro" data-f="'+k+'" aria-pressed="'+(filtro===k)+'">'+l+'</button>').join('')+'</div>';
+    const FL={todo:'Todo',tomas:'Solo tomas',panales:'Solo pañales'};
+    let h='<div class="wrap" id="historial" style="padding-bottom:16px"><div class="hhead"><h2>Historial</h2>'+(canWrite?'<button class="smallbtn" data-act="manualChoose">+ Cargar a mano</button>':'')+
+      '<button class="iconbtn'+(filtro!=='todo'?' on':'')+'" data-act="fToggle" aria-label="Filtrar: '+FL[filtro]+'" aria-expanded="'+fOpen+'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4z"/></svg></button>'+
+      (fOpen?'<div class="fmenu" role="menu">'+Object.keys(FL).map(k=>'<button role="menuitemradio" aria-checked="'+(filtro===k)+'" data-act="filtro" data-f="'+k+'">'+FL[k]+(filtro===k?'<span aria-hidden="true">✓</span>':'')+'</button>').join('')+'</div>':'')+'</div>';
     let ev=[];
     if(filtro!=='panales') ev=ev.concat(tomas.map(t=>({k:'t',ms:t.inicio,o:t})));
     if(filtro!=='tomas') ev=ev.concat(panales.map(p=>({k:'p',ms:p.hora,o:p})));
     ev.sort((a,b)=>b.ms-a.ms);
-    if(!ev.length) return h+'<p class="empty">Todavía no hay registros.</p></div>';
+    if(!ev.length) return h+'<p class="empty">'+(filtro==='todo'?'Todavía no hay registros.':'No hay registros con este filtro.')+'</p></div>';
     const groups=new Map(); ev.forEach(e=>{const k=ymd(e.ms); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(e);});
-    groups.forEach((evs,key)=>{
+    let n=0; const total=groups.size;
+    groups.forEach((evs,key)=>{ if(n++>=histDias) return;
       const tl=tomas.filter(t=>ymd(t.inicio)===key), pl=panales.filter(p=>ymd(p.hora)===key);
       const cm=tl.filter(t=>tomado(t)!=null), tot=sum(cm.map(tomado));
       h+='<div class="dayhead"><h2>'+dayLabel(key)+'</h2><span class="num">'+tl.length+(tl.length===1?' toma':' tomas')+' · '+tot+' ml'+(cm.length?' · prom. '+Math.round(tot/cm.length):'')+' · '+pl.length+(pl.length===1?' pañal':' pañales')+'</span></div><div class="list">';
@@ -617,6 +650,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
       });
       h+='</div>';
     });
+    if(total>histDias) h+='<button class="morebtn" data-act="masDias">Ver días anteriores</button>';
     return h+'</div>';
   }
 
@@ -835,7 +869,9 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
   }
 
   document.addEventListener('click',e=>{
-    const b=e.target.closest('[data-act]'); if(!b||b.disabled) return;
+    const b=e.target.closest('[data-act]');
+    if(fOpen&&!e.target.closest('.fmenu')&&!(b&&b.dataset.act==='fToggle')){ fOpen=false; if(!b) rerenderSoft(); }
+    if(!b||b.disabled) return;
     const act=b.dataset.act, id=b.dataset.id;
     switch(act){
       case 'tab': tab=b.dataset.tab; close(); render(); window.scrollTo(0,0); break;
@@ -857,7 +893,10 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
       case 'manualChoose':
         sheet('<h2>Cargar a mano</h2><div class="grid g2"><button class="ghost" id="mT">Toma</button><button class="ghost" id="mP">Pañal</button></div>');
         $('mT').onclick=()=>openEditToma(null); $('mP').onclick=()=>openPanal(null); break;
-      case 'filtro': filtro=b.dataset.f; render(); break;
+      case 'filtro': filtro=b.dataset.f; fOpen=false; histDias=2; rerenderSoft(); break;
+      case 'fToggle': fOpen=!fOpen; rerenderSoft(); break;
+      case 'masDias': histDias+=7; rerenderSoft(); break;
+      case 'reMed': { const m=meds.find(x=>x.id===id); if(m&&canWrite) safe(()=>colM.doc(m.id).update({activo:true,hasta:''}),m.nombre+' activo de nuevo'); break; }
       case 'mes': mes=new Date(mes.getFullYear(),mes.getMonth()+Number(b.dataset.d),1); render(); break;
       case 'step': { const k=b.dataset.k, lim=k==='espera'?[5,60]:[1,6]; const v=Math.min(lim[1],Math.max(lim[0],(Number(cfg[k])||0)+Number(b.dataset.d))); if(v!==cfg[k]){ saveCfg({[k]:v}); render(); } break; }
       case 'sw': saveCfg({[b.dataset.k]:!cfg[b.dataset.k]}); render(); break;
@@ -902,7 +941,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
 
   // ---------- atajos de Siri: #empezo y #termino ----------
   const H=(location.hash||'').slice(1).toLowerCase();
-  if(['inicio','historial','salud','resumen','ajustes'].includes(H)) tab=H;
+  if(['inicio','salud','resumen','ajustes'].includes(H)) tab=H; else if(H==='historial') tab='inicio';
   let hashDone=false;
   function handleHash(){
     if(hashDone||!loadedT) return; hashDone=true;

@@ -237,8 +237,7 @@ def construir_index():
         '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">'
         '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">'
         '<meta name="apple-mobile-web-app-title" content="Sol"><meta name="theme-color" content="#0E151B">'
-        '<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}'
-        'body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>'
+        '<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>'
         '<script src="shim.js?v=' + VERSION + '"></script></head><body>'
     )
     return (head + src + "</body></html>").encode("utf-8")

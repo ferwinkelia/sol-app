@@ -288,6 +288,11 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
   const money=n=>'$'+Math.round(n).toLocaleString('es-AR');
   const dec=n=>n.toLocaleString('es-AR',{maximumFractionDigits:1});
   const lit=ml=>ml>=1000?dec(ml/1000)+' l':Math.round(ml)+' ml';
+  function ajustarFin(inicio,fin){
+    if(fin<inicio){ const f2=fin+864e5; if(f2-inicio<=4*3600e3) fin=f2; else { toast('La hora de fin es anterior al inicio. Revisala.'); return null; } }
+    if(fin>Date.now()+5*60e3){ toast('La hora de fin todavía no llegó. Revisala.'); return null; }
+    return fin;
+  }
   function build(d,t){const [y,m,dd]=d.split('-').map(Number);const [h,mi]=t.split(':').map(Number);return new Date(y,m-1,dd,h,mi).getTime();}
   function dayLabel(k){const t=ymd(Date.now()),y=ymd(Date.now()-864e5);if(k===t)return 'Hoy';if(k===y)return 'Ayer';const [a,b,c]=k.split('-').map(Number);const s=new Date(a,b-1,c).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'short'});return s.charAt(0).toUpperCase()+s.slice(1);}
   function edad(){
@@ -405,6 +410,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
     const ld=lastDone(), E=(Number(cfg.espera)||15)*60e3;
     if(active()||!ld){ el.hidden=true; return; }
     const left=ld.fin+E-Date.now();
+    if(left>E){ el.hidden=true; return; }
     if(left>0){
       const s=Math.ceil(left/1000);
       el.className='nap'; el.hidden=false;
@@ -723,7 +729,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
     $('sBack').onclick=close;
     $('sSave').onclick=async()=>{
       const ft=$('fFin').value; if(!ft){toast('Poné la hora de fin.');return;}
-      let fin=ft===def?t0:build(ymd(t.inicio),ft); while(fin<t.inicio) fin+=864e5;
+      let fin=ft===def?t0:ajustarFin(t.inicio,build(ymd(t.inicio),ft)); if(fin==null) return;
       if(await safe(()=>colT.doc(t.id).update({fin,ml:readMl(),sobro:sob,cargas:[]}),'Toma guardada')) close();
     };
   }
@@ -751,7 +757,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
     $('eSave').onclick=async()=>{
       const d=$('eDate').value,i=$('eIni').value,f=$('eFin').value;
       if(!d||!i){toast('Completá fecha y hora de inicio.');return;}
-      const inicio=build(d,i); let fin=null; if(f){fin=build(d,f); while(fin<inicio) fin+=864e5;}
+      const inicio=build(d,i); let fin=null; if(f){fin=ajustarFin(inicio,build(d,f)); if(fin==null) return;}
       const a=active(); if(fin==null&&a&&(!t||a.id!==t.id)){toast('Ya hay una toma en curso. Poné la hora de fin.');return;}
       const data={inicio,fin,ml:readMl(),sobro:sob,cargas:[],nota:$('eNota').value.trim()};
       const ok=nueva?await safe(()=>colT.add(Object.assign({retomas:0},data)),'Toma cargada'):await safe(()=>colT.doc(t.id).update(data),'Cambios guardados');

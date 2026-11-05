@@ -212,8 +212,6 @@ def accion(nombre, d):
             sobro = None if sobro in (None, "") else max(0, min(1000, round(float(sobro))))
         except (TypeError, ValueError):
             sobro = None
-        if ml is not None and sobro is not None:
-            sobro = min(sobro, ml)
         data = {k: v for k, v in activa.items() if k != "id"}
         data["fin"] = t
         if ml is not None:
@@ -222,9 +220,9 @@ def accion(nombre, d):
             data["sobro"] = sobro
         escribir([("tomas", activa["id"], data)])
         msg = f"Listo, terminó a las {hora(t)}."
-        msg += f" Anoté {ml} mililitros." if ml is not None else " Falta anotar los mililitros."
+        msg += f" Tomó {ml} mililitros." if ml is not None else " Falta anotar los mililitros."
         if sobro:
-            msg += f" Sobraron {sobro}, tomó {ml - sobro}." if ml is not None else f" Sobraron {sobro}."
+            msg += f" Sobraron {sobro}."
         return msg + f" Se puede acostar a las {hora(t + config()['espera'] * 60000)}."
     if nombre == "panal":
         pis = bool(d.get("pis", True))

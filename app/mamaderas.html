@@ -249,9 +249,14 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
 .med .give{border:none;border-radius:999px;background:var(--accent);color:var(--accent-ink);min-height:46px;padding:0 18px;font-family:var(--display);font-weight:600;font-size:16px;flex:none}
 .med .give.done{background:var(--accent-soft);color:var(--accent)}
 .growth{background:var(--surface);border:1px solid var(--line2);border-radius:22px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
-.gstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.gstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
 .gstats>div{background:var(--surface2);border:1px solid var(--line2);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column}
-.gstats b{font-family:var(--display);font-weight:700;font-size:24px;line-height:1.1}
+.gstats b{font-family:var(--display);font-weight:700;font-size:20px;line-height:1.1;white-space:nowrap}
+.item.d .ib{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent)}
+.termhead{display:flex;justify-content:space-between;align-items:center;padding:6px 4px 0}
+.termhead button{border:none;background:none;color:var(--accent);font-size:13px;min-height:36px;padding:0 4px;text-decoration:underline}
+.fotoprev{width:120px;height:120px;border-radius:50%;overflow:hidden;background:var(--line2);flex:none;margin:4px auto 0}
+.fotoprev img,.av img{transform-origin:var(--fx,50%) var(--fy,35%)}
 .gstats .pc{font-size:13px;color:var(--accent);font-weight:700}
 .chart{width:100%;height:auto;display:block}
 .chart text{font-size:10px;fill:var(--muted);font-family:var(--body)}
@@ -298,6 +303,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
 (function(){
   const $=id=>document.getElementById(id);
   const IC={
+    pill:s=>'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-45 12 12)"/><path d="M9.2 9.2l5.6 5.6"/></svg>',
     bottle:s=>'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2h4"/><path d="M10.5 2v2.5L9 6h6l-1.5-1.5V2"/><rect x="7" y="6" width="10" height="16" rx="3"/><path d="M7 12h3M7 16h3"/></svg>',
     diaper:s=>'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v4a9 9 0 0 1-18 0z"/><path d="M8 6v3M16 6v3"/><path d="M8 14c1.2 1.2 2.5 1.8 4 1.8s2.8-.6 4-1.8"/></svg>',
     camera:'<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
@@ -307,7 +313,8 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
 
   let db=null,colT=null,colP=null,cfgRef=null,fotoRef=null,downloads=null,canWrite=true;
   let tomas=[],panales=[],meds=[],dosis=[],controles=[],cfg=Object.assign({},DEF),foto=null,loadedT=false;
-  let colM=null,colD=null,colC=null,saludTab='med',gVar='peso';
+  let colM=null,colD=null,colC=null,saludTab='med',gVar='peso',dFiltro='todo',dDias=3,verTerm=false;
+  try{verTerm=localStorage.getItem('sol_verTerm')==='1';}catch(e){}
   let tab='inicio',filtro='todo',mes=null,tick=null,fOpen=false,histDias=2;
 
   // ---------- utilidades ----------
@@ -393,9 +400,13 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
     const y=window.scrollY; render(); window.scrollTo(0,y);
   }
 
+  function fotoStyle(){
+    const x=Number(cfg.fotoX??50), y=Number(cfg.fotoPos??35), z=Number(cfg.fotoZoom||1);
+    return 'object-position:'+x+'% '+y+'%;--fx:'+x+'%;--fy:'+y+'%;transform:scale('+z+')';
+  }
   function hero(){
     const e=edad();
-    const img=foto?'<img src="'+foto+'" alt="Foto de '+esc(cfg.nombre)+'" style="object-position:50% '+(Number(cfg.fotoPos)||35)+'%">':'<span>Agregar foto</span>';
+    const img=foto?'<img src="'+foto+'" alt="Foto de '+esc(cfg.nombre)+'" style="'+fotoStyle()+'">':'<span>Agregar foto</span>';
     return '<div class="head"><div class="band"></div><button class="av" data-act="tab" data-tab="ajustes" aria-label="Cambiar la foto en Ajustes">'+img+'</button><div class="nm"><h1>'+esc(cfg.nombre)+'</h1>'+(e?'<span>'+e+'</span>':'')+'</div><button class="gear" data-act="tab" data-tab="ajustes" aria-label="Ajustes">'+IC.gear+'</button></div>';
   }
 
@@ -486,6 +497,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
   // ---------- salud: crecimiento (tablas OMS, niñas, P3 P15 P50 P85 P97 por mes) ----------
   const WFA=[[2.4,2.8,3.2,3.7,4.2],[3.2,3.6,4.2,4.8,5.4],[4.0,4.5,5.1,5.9,6.5],[4.6,5.1,5.8,6.7,7.4],[5.1,5.6,6.4,7.3,8.1],[5.5,6.1,6.9,7.8,8.7],[5.8,6.4,7.3,8.3,9.2],[6.1,6.7,7.6,8.7,9.6],[6.3,7.0,7.9,9.0,10.0],[6.6,7.3,8.2,9.3,10.4],[6.8,7.5,8.5,9.6,10.7],[7.0,7.7,8.7,9.9,11.0],[7.1,7.9,8.9,10.2,11.3],[7.3,8.1,9.2,10.4,11.6],[7.5,8.3,9.4,10.7,11.9],[7.7,8.5,9.6,10.9,12.2],[7.8,8.7,9.8,11.2,12.5],[8.0,8.8,10.0,11.4,12.7],[8.2,9.0,10.2,11.6,13.0],[8.3,9.2,10.4,11.9,13.3],[8.5,9.4,10.6,12.1,13.5],[8.7,9.6,10.9,12.4,13.8],[8.8,9.8,11.1,12.6,14.1],[9.0,9.9,11.3,12.8,14.3],[9.2,10.1,11.5,13.1,14.6]];
   const LFA=[[45.6,47.2,49.1,51.1,52.7],[50.0,51.7,53.7,55.7,57.4],[53.2,55.0,57.1,59.2,60.9],[55.8,57.6,59.8,62.0,63.8],[58.0,59.8,62.1,64.3,66.2],[59.9,61.7,64.0,66.3,68.2],[61.5,63.4,65.7,68.1,70.0],[62.9,64.9,67.3,69.7,71.6],[64.3,66.3,68.7,71.2,73.2],[65.6,67.6,70.1,72.6,74.7],[66.8,68.9,71.5,74.0,76.1],[68.0,70.2,72.8,75.4,77.5],[69.2,71.3,74.0,76.7,78.9],[70.3,72.5,75.2,77.9,80.2],[71.3,73.6,76.4,79.2,81.4],[72.4,74.7,77.5,80.3,82.7],[73.3,75.7,78.6,81.5,83.9],[74.3,76.7,79.7,82.6,85.0],[75.2,77.7,80.7,83.7,86.2],[76.2,78.7,81.7,84.8,87.3],[77.0,79.6,82.7,85.8,88.4],[77.9,80.5,83.7,86.8,89.4],[78.7,81.4,84.6,87.8,90.5],[79.6,82.2,85.5,88.8,91.5],[80.3,83.1,86.4,89.8,92.5]];
+  const HCFA=[[31.7,32.7,33.9,35.1,36.1],[34.3,35.3,36.5,37.8,38.8],[36.0,37.0,38.3,39.5,40.5],[37.2,38.2,39.5,40.8,41.9],[38.2,39.3,40.6,41.9,43.0],[39.0,40.1,41.5,42.8,43.9],[39.7,40.8,42.2,43.5,44.6],[40.4,41.5,42.8,44.2,45.3],[40.9,42.0,43.4,44.7,45.9],[41.3,42.4,43.8,45.2,46.3],[41.7,42.8,44.2,45.6,46.8],[42.0,43.2,44.6,46.0,47.1],[42.3,43.5,44.9,46.3,47.5],[42.6,43.8,45.2,46.6,47.7],[42.9,44.0,45.4,46.8,48.0],[43.1,44.2,45.7,47.1,48.2],[43.3,44.4,45.9,47.3,48.5],[43.5,44.6,46.1,47.5,48.7],[43.6,44.8,46.2,47.7,48.8],[43.8,45.0,46.4,47.8,49.0],[44.0,45.1,46.6,48.0,49.2],[44.1,45.3,46.7,48.2,49.4],[44.3,45.4,46.9,48.3,49.5],[44.4,45.6,47.0,48.5,49.7],[44.6,45.7,47.2,48.6,49.8]];
   const ZC=[-1.881,-1.036,0,1.036,1.881];
   function ncdf(z){const t=1/(1+.3275911*Math.abs(z)/Math.SQRT2);const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-z*z/2);return z>=0?(1+y)/2:(1-y)/2;}
   function rowAt(T,m){const i=Math.max(0,Math.min(23,Math.floor(m))),f=Math.max(0,Math.min(1,m-i));return T[i].map((v,k)=>v+(T[i+1][k]-v)*f);}
@@ -501,12 +513,12 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
   const parseDec=v=>{const n=Number(String(v).trim().replace(',','.'));return v===''||!(n>0)?null:n;};
 
   function chart(){
-    const T=gVar==='peso'?WFA:LFA, key=gVar, unit=gVar==='peso'?'kg':'cm';
+    const T=gVar==='peso'?WFA:gVar==='talla'?LFA:HCFA, key=gVar, unit=gVar==='peso'?'kg':'cm';
     const pts=controles.filter(c=>c[key]>0).map(c=>({m:mesesEn(c.fecha),v:c[key]})).filter(p=>p.m!=null&&p.m>=0&&p.m<=24);
     const edadM=cfg.nacimiento?mesesEn(ymd(Date.now())):6;
     const mMax=Math.min(24,Math.max(6,Math.ceil(Math.max(edadM,...pts.map(p=>p.m),0))+2)), mMin=Math.max(0,Math.floor(Math.min(edadM,...pts.map(p=>p.m)))-3);
     let lo=Infinity,hi=-Infinity; for(let m=mMin;m<=mMax;m+=.5){const r=rowAt(T,m); lo=Math.min(lo,r[0]); hi=Math.max(hi,r[4]);} pts.forEach(p=>{lo=Math.min(lo,p.v);hi=Math.max(hi,p.v);});
-    const step=gVar==='peso'?1:5; lo=Math.floor(lo/step)*step; hi=Math.ceil(hi/step)*step;
+    const step=gVar==='peso'?1:gVar==='talla'?5:2; lo=Math.floor(lo/step)*step; hi=Math.ceil(hi/step)*step;
     const W=340,H=220,L=34,R=34,Tp=10,B=26, X=m=>L+(m-mMin)/(mMax-mMin)*(W-L-R), Y=v=>Tp+(hi-v)/(hi-lo)*(H-Tp-B);
     let g='';
     for(let v=lo;v<=hi;v+=step){ g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" style="stroke:var(--line2)"/><text x="'+(L-6)+'" y="'+(Y(v)+3)+'" text-anchor="end">'+v+'</text>'; }
@@ -518,13 +530,13 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
     pts.sort((a,b)=>a.m-b.m);
     if(pts.length>1) g+='<path d="'+pts.map((p,i)=>(i?'L':'M')+X(p.m).toFixed(1)+' '+Y(p.v).toFixed(1)).join('')+'" fill="none" style="stroke:var(--m-acc);stroke-width:2"/>';
     pts.forEach(p=>{ g+='<circle cx="'+X(p.m).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="4.5" style="fill:var(--m-acc);stroke:var(--surface);stroke-width:2"/>'; });
-    const lbl='Curvas de percentiles de '+(gVar==='peso'?'peso':'talla')+' para niñas según la OMS, con '+pts.length+' mediciones de '+esc(cfg.nombre);
+    const lbl='Curvas de percentiles de '+(gVar==='peso'?'peso':gVar==='talla'?'talla':'perímetro cefálico')+' para niñas según la OMS, con '+pts.length+' mediciones de '+esc(cfg.nombre);
     return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+lbl+'">'+g+'</svg><p class="hint" style="text-align:center">Edad en meses · '+unit+'</p>';
   }
 
   function vSalud(){
     let h='<div class="wrap top"><div class="row"><h1>Salud</h1></div>';
-    h+='<div class="seg" role="group" aria-label="Sección"><button data-act="saludTab" data-v="med" aria-pressed="'+(saludTab==='med')+'">Medicación</button><button data-act="saludTab" data-v="crec" aria-pressed="'+(saludTab==='crec')+'">Peso y talla</button></div>';
+    h+='<div class="seg" role="group" aria-label="Sección"><button data-act="saludTab" data-v="med" aria-pressed="'+(saludTab==='med')+'">Medicación</button><button data-act="saludTab" data-v="crec" aria-pressed="'+(saludTab==='crec')+'">Crecimiento</button></div>';
     if(saludTab==='med'){
       const act=meds.filter(activeMed).sort((a,b)=>String(a.nombre).localeCompare(b.nombre));
       if(!act.length) h+='<p class="empty">No hay medicamentos cargados. Agregá el primero con el botón de abajo.</p>';
@@ -533,30 +545,29 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
           (canWrite?'<button class="give'+(st.done?' done':'')+'" data-act="darMed" data-id="'+m.id+'">Le di</button>':'')+'</div>'; });
       if(canWrite) h+='<button class="ghost" style="color:var(--accent)" data-act="newMed">+ Agregar medicamento</button>';
       const term=meds.filter(m=>!activeMed(m));
-      if(term.length) h+='<div class="dayhead"><h2>Terminados</h2></div><div class="list">'+term.map(m=>'<div class="medrow"><button class="item" data-act="editMed" data-id="'+m.id+'"><span class="mid"><b>'+esc(m.nombre)+'</b><span class="sub">'+esc(m.dosis||'')+(m.dosis?' · ':'')+freqTxt(m)+'</span></span></button>'+(canWrite?'<button class="link acc" data-act="reMed" data-id="'+m.id+'">Reactivar</button>':'')+'</div>').join('')+'</div>';
-      const ult=dosis.slice().sort((a,b)=>b.hora-a.hora).slice(0,30);
-      if(ult.length){
-        h+='<div class="dayhead"><h2>Últimas dosis</h2><span>tocá una para corregirla</span></div><div class="list">';
-        ult.forEach(d=>{ h+='<button class="item" data-act="editDosis" data-id="'+d.id+'"><span class="mid"><b class="num">'+dayLabel(ymd(d.hora))+' · '+hhmm(d.hora)+'</b><span class="sub">'+esc(d.nombre)+(d.dosis?' · '+esc(d.dosis):'')+(d.nota?' · '+esc(d.nota):'')+'</span></span></button>'; });
-        h+='</div>';
+      if(term.length){
+        h+='<div class="termhead"><h2>Terminados <span class="sub" style="font-weight:400">('+term.length+')</span></h2><button data-act="verTerm" aria-expanded="'+verTerm+'">'+(verTerm?'Ocultar':'Mostrar')+'</button></div>';
+        if(verTerm) h+='<div class="list">'+term.map(m=>'<div class="medrow"><button class="item" data-act="editMed" data-id="'+m.id+'"><span class="mid"><b>'+esc(m.nombre)+'</b><span class="sub">'+esc(m.dosis||'')+(m.dosis?' · ':'')+freqTxt(m)+'</span></span></button>'+(canWrite?'<button class="link acc" data-act="reMed" data-id="'+m.id+'">Reactivar</button>':'')+'</div>').join('')+'</div>';
       }
+      h+=histDosis();
       h+='<p class="hint">La app solo registra lo que ustedes le dan, según la indicación del pediatra. No calcula dosis.</p>';
       return h+'</div>';
     }
     if(!cfg.nacimiento) return h+'<section class="card"><h2>Falta la fecha de nacimiento</h2><p class="sub" style="margin:0">Cargala en Ajustes para calcular los percentiles.</p><button class="ghost" data-act="tab" data-tab="ajustes" style="color:var(--accent)">Ir a Ajustes</button></section></div>';
     const cs=controles.slice().sort((a,b)=>b.fecha.localeCompare(a.fecha));
-    const lp=cs.find(c=>c.peso>0), lt=cs.find(c=>c.talla>0);
+    const lp=cs.find(c=>c.peso>0), lt=cs.find(c=>c.talla>0), lc=cs.find(c=>c.cefalico>0);
     h+='<section class="growth"><div class="gstats num"><div><span class="lbl">Peso</span><b>'+(lp?fmt1(lp.peso)+' kg':'—')+'</b><span class="pc">'+(lp?'Percentil '+(percentil(WFA,mesesEn(lp.fecha),lp.peso)??'—'):'Sin datos')+'</span></div>'+
-      '<div><span class="lbl">Talla</span><b>'+(lt?fmt1(lt.talla)+' cm':'—')+'</b><span class="pc">'+(lt?'Percentil '+(percentil(LFA,mesesEn(lt.fecha),lt.talla)??'—'):'Sin datos')+'</span></div></div>';
-    h+='<div class="seg" role="group" aria-label="Gráfico"><button data-act="gVar" data-v="peso" aria-pressed="'+(gVar==='peso')+'">Peso</button><button data-act="gVar" data-v="talla" aria-pressed="'+(gVar==='talla')+'">Talla</button></div>'+chart()+'</section>';
+      '<div><span class="lbl">Talla</span><b>'+(lt?fmt1(lt.talla)+' cm':'—')+'</b><span class="pc">'+(lt?'Percentil '+(percentil(LFA,mesesEn(lt.fecha),lt.talla)??'—'):'Sin datos')+'</span></div>'+
+      '<div><span class="lbl">Cabeza</span><b>'+(lc?fmt1(lc.cefalico)+' cm':'—')+'</b><span class="pc">'+(lc?'Percentil '+(percentil(HCFA,mesesEn(lc.fecha),lc.cefalico)??'—'):'Sin datos')+'</span></div></div>';
+    h+='<div class="seg" role="group" aria-label="Gráfico"><button data-act="gVar" data-v="peso" aria-pressed="'+(gVar==='peso')+'">Peso</button><button data-act="gVar" data-v="talla" aria-pressed="'+(gVar==='talla')+'">Talla</button><button data-act="gVar" data-v="cefalico" aria-pressed="'+(gVar==='cefalico')+'">Cabeza</button></div>'+chart()+'</section>';
     if(canWrite) h+='<button class="ghost" style="color:var(--accent)" data-act="newControl">+ Cargar control</button>';
     if(cs.length){
       h+='<div class="dayhead"><h2>Controles</h2></div><div class="list">';
       cs.forEach(c=>{ const m=mesesEn(c.fecha), [y,mo,d]=c.fecha.split('-');
-        const parts=[]; if(c.peso>0) parts.push(fmt1(c.peso)+' kg (P'+(percentil(WFA,m,c.peso)??'—')+')'); if(c.talla>0) parts.push(fmt1(c.talla)+' cm (P'+(percentil(LFA,m,c.talla)??'—')+')');
+        const parts=[]; if(c.peso>0) parts.push(fmt1(c.peso)+' kg (P'+(percentil(WFA,m,c.peso)??'—')+')'); if(c.talla>0) parts.push(fmt1(c.talla)+' cm (P'+(percentil(LFA,m,c.talla)??'—')+')'); if(c.cefalico>0) parts.push('cabeza '+fmt1(c.cefalico)+' cm (P'+(percentil(HCFA,m,c.cefalico)??'—')+')');
         h+='<button class="item" data-act="editControl" data-id="'+c.id+'"><span class="mid"><b class="num">'+d+'/'+mo+'/'+y+' · '+(m!=null?dec(m)+' meses':'')+'</b><span class="sub">'+parts.join(' · ')+(c.nota?' · '+esc(c.nota):'')+'</span></span></button>'; });
       h+='</div>';
-    } else h+='<p class="empty">Cargá el peso y la talla del último control para ver el percentil.</p>';
+    } else h+='<p class="empty">Cargá el peso, la talla y, si lo tenés, el perímetro cefálico del último control para ver los percentiles.</p>';
     h+='<p class="hint">Percentiles según las tablas de crecimiento de la OMS para niñas de 0 a 2 años, interpolados por edad. Son orientativos: la evaluación la hace el pediatra.</p>';
     return h+'</div>';
   }
@@ -596,6 +607,36 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
       $('dNo').onclick=close; $('dYes').onclick=async()=>{ if(await go()) close(); };
     } else go();
   }
+  function histDosis(){
+    const nombres=[...new Set(dosis.map(d=>d.nombre))].sort((a,b)=>String(a).localeCompare(b));
+    if(dFiltro!=='todo'&&!nombres.includes(dFiltro)) dFiltro='todo';
+    let h='<div class="hhead"><h2>Historial</h2>'+(canWrite&&meds.length?'<button class="smallbtn" data-act="newDosis">+ Cargar a mano</button>':'')+
+      (nombres.length>1?'<button class="iconbtn'+(dFiltro!=='todo'?' on':'')+'" data-act="fToggle" aria-label="Filtrar: '+(dFiltro==='todo'?'todos':esc(dFiltro))+'" aria-expanded="'+fOpen+'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4z"/></svg></button>':'')+
+      (fOpen?'<div class="fmenu" role="menu">'+['todo'].concat(nombres).map(k=>'<button role="menuitemradio" aria-checked="'+(dFiltro===k)+'" data-act="dFiltro" data-f="'+esc(k)+'">'+(k==='todo'?'Todos':esc(k))+(dFiltro===k?'<span aria-hidden="true">✓</span>':'')+'</button>').join('')+'</div>':'')+'</div>';
+    const ds=dosis.filter(d=>dFiltro==='todo'||d.nombre===dFiltro).sort((a,b)=>b.hora-a.hora);
+    if(!ds.length) return h+'<p class="empty">Todavía no hay dosis registradas.</p>';
+    const groups=new Map(); ds.forEach(d=>{const k=ymd(d.hora); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(d);});
+    let n=0;
+    groups.forEach((g,key)=>{ if(n++>=dDias) return;
+      h+='<div class="dayhead"><h2>'+dayLabel(key)+'</h2><span class="num">'+g.length+(g.length===1?' dosis':' dosis')+'</span></div><div class="list">';
+      g.forEach(d=>{ h+='<button class="item d" data-act="editDosis" data-id="'+d.id+'" aria-label="Editar dosis de '+esc(d.nombre)+' de las '+hhmm(d.hora)+'"><span class="ib">'+IC.pill(19)+'</span><span class="mid"><b>'+esc(d.nombre)+'</b><span class="sub num">'+hhmm(d.hora)+(d.dosis?' · '+esc(d.dosis):'')+(d.nota?' · '+esc(d.nota):'')+'</span></span></button>'; });
+      h+='</div>';
+    });
+    if(groups.size>dDias) h+='<button class="morebtn" data-act="masDosis">Ver días anteriores</button>';
+    return h;
+  }
+  function newDosis(){
+    const ms=meds.slice().sort((a,b)=>(activeMed(b)-activeMed(a))||String(a.nombre).localeCompare(b.nombre));
+    sheet('<h2>Cargar dosis a mano</h2><label class="fld">Medicamento<select id="nMed" class="inp" style="width:100%">'+ms.map(m=>'<option value="'+m.id+'">'+esc(m.nombre)+(activeMed(m)?'':' (terminado)')+'</option>').join('')+'</select></label>'+
+      '<div class="fields"><label class="fld">Fecha<input id="nDate" type="date" value="'+ymd(Date.now())+'"></label><label class="fld">Hora<input id="nHora" type="time" value="'+hhmm(Date.now())+'"></label></div>'+
+      '<label class="fld">Nota (opcional)<input id="nNota" type="text" maxlength="80"></label>'+
+      '<div class="foot"><button class="ghost" id="nBack">Volver</button><button class="primary" id="nSave">Guardar</button></div>');
+    $('nBack').onclick=close;
+    $('nSave').onclick=async()=>{ const m=meds.find(x=>x.id===$('nMed').value), a=$('nDate').value, b=$('nHora').value;
+      if(!m||!a||!b){toast('Completá medicamento, fecha y hora.');return;}
+      const hora=build(a,b); if(hora>Date.now()+5*60e3){toast('Esa hora todavía no llegó. Revisala.');return;}
+      if(await safe(()=>colD.add({medId:m.id,nombre:m.nombre,dosis:m.dosis||'',hora,nota:$('nNota').value.trim()}),'Dosis cargada: '+m.nombre+' '+b)) close(); };
+  }
   function openDosis(d){
     sheet('<h2>Dosis de '+esc(d.nombre)+'</h2><div class="fields"><label class="fld">Fecha<input id="xDate" type="date" value="'+ymd(d.hora)+'"></label><label class="fld">Hora<input id="xHora" type="time" value="'+hhmm(d.hora)+'"></label></div>'+
       '<label class="fld">Nota (opcional)<input id="xNota" type="text" maxlength="80" value="'+esc(d.nota)+'"></label>'+
@@ -609,16 +650,18 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
     const nuevo=!c;
     sheet('<h2>'+(nuevo?'Cargar control':'Editar control')+'</h2><label class="fld">Fecha<input id="gDate" type="date" value="'+(c?c.fecha:ymd(Date.now()))+'"></label>'+
       '<div class="fields"><label class="fld">Peso (kg)<input id="gPeso" type="text" inputmode="decimal" placeholder="Ej.: 6,450" value="'+(c&&c.peso?fmt1(c.peso):'')+'"></label><label class="fld">Talla (cm)<input id="gTalla" type="text" inputmode="decimal" placeholder="Ej.: 63,5" value="'+(c&&c.talla?fmt1(c.talla):'')+'"></label></div>'+
+      '<label class="fld">Perímetro cefálico (cm, opcional)<input id="gCef" type="text" inputmode="decimal" placeholder="Ej.: 41,5" value="'+(c&&c.cefalico?fmt1(c.cefalico):'')+'"></label>'+
       '<label class="fld">Nota (opcional)<input id="gNota" type="text" maxlength="80" placeholder="Ej.: control con la pediatra" value="'+esc(c&&c.nota)+'"></label>'+
       '<div class="foot"><button class="ghost" id="gBack">Volver</button><button class="primary" id="gSave">Guardar</button></div>'+(c?'<div id="delZone" class="links"><button class="link" id="gDel">Borrar este control</button></div>':''));
     $('gBack').onclick=close;
     $('gSave').onclick=async()=>{
-      const fecha=$('gDate').value, peso=parseDec($('gPeso').value), talla=parseDec($('gTalla').value);
+      const fecha=$('gDate').value, peso=parseDec($('gPeso').value), talla=parseDec($('gTalla').value), cefalico=parseDec($('gCef').value);
       if(!fecha){toast('Poné la fecha del control.');return;}
-      if(!peso&&!talla){toast('Cargá el peso, la talla o los dos.');return;}
+      if(!peso&&!talla&&!cefalico){toast('Cargá al menos un dato: peso, talla o perímetro cefálico.');return;}
+      if(cefalico&&(cefalico<25||cefalico>60)){toast('Revisá el perímetro cefálico: va en centímetros, por ejemplo 41,5.');return;}
       if(peso&&(peso<1||peso>30)){toast('Revisá el peso: va en kilos, por ejemplo 6,45.');return;}
       if(talla&&(talla<35||talla>130)){toast('Revisá la talla: va en centímetros, por ejemplo 63,5.');return;}
-      const data={fecha,peso,talla,nota:$('gNota').value.trim()};
+      const data={fecha,peso,talla,cefalico,nota:$('gNota').value.trim()};
       const ok=nuevo?await safe(()=>colC.add(data),'Control guardado'):await safe(()=>colC.doc(c.id).update(data),'Cambios guardados');
       if(ok) close();
     };
@@ -701,9 +744,12 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
     const p=(cfg.precios||[]).slice().sort((a,b)=>b.desde-a.desde)[0]||{};
     const t=getTema(), dis=canWrite?'':' disabled';
     let h='<div class="wrap top"><h1>Ajustes</h1>';
-    h+='<section class="set"><h2>Bebé</h2><div class="row" style="justify-content:flex-start;gap:14px"><div class="avatar">'+(foto?'<img src="'+foto+'" alt="" style="object-position:50% '+(Number(cfg.fotoPos)||35)+'%">':IC.camera)+'</div><div style="display:flex;gap:8px;flex-wrap:wrap">'+
+    h+='<section class="set"><h2>Bebé</h2><div class="row" style="justify-content:flex-start;gap:14px">'+(foto?'':'<div class="avatar">'+IC.camera+'</div>')+'<div style="display:flex;gap:8px;flex-wrap:wrap">'+
       (canWrite?'<label class="filebtn">'+(foto?'Cambiar foto':'Elegir foto')+'<input type="file" id="fFoto" accept="image/*"></label>'+(foto?'<button class="ghost" style="min-height:42px" data-act="quitarFoto">Quitar</button>':''):'')+'</div></div>';
-    if(foto&&canWrite) h+='<label class="fld">Encuadre de la foto: más arriba o más abajo<input type="range" id="fPos" min="0" max="100" value="'+(Number(cfg.fotoPos)||35)+'"></label>';
+    if(foto&&canWrite) h+='<div class="fld">Encuadre de la foto en el encabezado<div class="fotoprev"><img id="fPrev" src="'+foto+'" alt="Vista previa del encuadre" style="width:100%;height:100%;object-fit:cover;display:block;'+fotoStyle()+'"></div></div>'+
+      '<label class="fld">Acercar<input type="range" class="fEnc" id="fZoom" min="1" max="3" step="0.05" value="'+Number(cfg.fotoZoom||1)+'"></label>'+
+      '<label class="fld">Izquierda o derecha<input type="range" class="fEnc" id="fX" min="0" max="100" value="'+Number(cfg.fotoX??50)+'"></label>'+
+      '<label class="fld">Arriba o abajo<input type="range" class="fEnc" id="fPos" min="0" max="100" value="'+Number(cfg.fotoPos??35)+'"></label>';
     h+='<div class="fields"><label class="fld">Nombre<input id="cNombre" type="text" maxlength="30" value="'+esc(cfg.nombre)+'"'+dis+'></label><label class="fld">Fecha de nacimiento<input id="cNac" type="date" value="'+esc(cfg.nacimiento)+'"'+dis+'></label></div></section>';
 
     h+='<section class="set"><h2>Mamaderas</h2>';
@@ -923,21 +969,30 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:0;padding:0;b
       case 'desconectar':
         sheet('<h2>¿Desconectar todos los celulares?</h2><p class="sub" style="margin:0">Este celular y los demás van a tener que volver a poner el PIN.</p><div class="foot"><button class="ghost" id="dNo">No</button><button class="danger" id="dYes">Sí, desconectar</button></div>');
         $('dNo').onclick=close; $('dYes').onclick=()=>window.claude.desconectarTodo().catch(()=>toast('No se pudo desconectar.')); break;
-      case 'saludTab': saludTab=b.dataset.v; render(); break;
+      case 'saludTab': saludTab=b.dataset.v; fOpen=false; render(); break;
       case 'gVar': gVar=b.dataset.v; render(); break;
       case 'newMed': openMed(null); break;
       case 'editMed': { const m=meds.find(x=>x.id===id); if(m&&canWrite) openMed(m); break; }
       case 'darMed': { const m=meds.find(x=>x.id===id); if(m) darMed(m); break; }
+      case 'verTerm': verTerm=!verTerm; try{localStorage.setItem('sol_verTerm',verTerm?'1':'0');}catch(e){} rerenderSoft(); break;
+      case 'dFiltro': dFiltro=b.dataset.f; fOpen=false; dDias=3; rerenderSoft(); break;
+      case 'masDosis': dDias+=7; rerenderSoft(); break;
+      case 'newDosis': if(canWrite) newDosis(); break;
       case 'editDosis': { const d=dosis.find(x=>x.id===id); if(d&&canWrite) openDosis(d); break; }
       case 'newControl': openControl(null); break;
       case 'editControl': { const c=controles.find(x=>x.id===id); if(c&&canWrite) openControl(c); break; }
     }
   });
+  document.addEventListener('input',e=>{
+    const t=e.target; if(!(t.classList&&t.classList.contains('fEnc'))) return;
+    const x=$('fX').value, y=$('fPos').value, z=$('fZoom').value, im=$('fPrev');
+    if(im) im.style.cssText+=';object-position:'+x+'% '+y+'%;--fx:'+x+'%;--fy:'+y+'%;transform:scale('+z+')';
+  });
   document.addEventListener('change',e=>{
     const t=e.target; if(!canWrite) return;
     if(t.id==='fFoto') guardarFoto(t.files&&t.files[0]);
     else if(t.id==='fImport') importar(t.files&&t.files[0]);
-    else if(t.id==='fPos') saveCfg({fotoPos:Number(t.value)});
+    else if(t.classList&&t.classList.contains('fEnc')) saveCfg({fotoZoom:Number($('fZoom').value),fotoX:Number($('fX').value),fotoPos:Number($('fPos').value)});
     else if(t.id==='cNombre'){ const v=t.value.trim()||'Sol'; if(v!==cfg.nombre) saveCfg({nombre:v},'Nombre guardado'); }
     else if(t.id==='cNac'){ if(t.value!==cfg.nacimiento) saveCfg({nacimiento:t.value},'Fecha guardada'); }
     else if(t.id==='cCargas'||t.id==='cRecargas'){ const l=parseList(t.value).slice(0,3); if(!l.length){toast('Poné al menos una cantidad.');return;} saveCfg({[t.id==='cCargas'?'cargas':'recargas']:l},'Botones guardados'); t.value=l.join(', '); }

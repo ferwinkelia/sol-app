@@ -28,7 +28,8 @@
   --m-bg:#173328; --m-ink:#A9E2C6; --m-chip:#1F4536; --m-acc:#4FB38A; --m-acc-ink:#0C1E16;
   --p-bg:#25233F; --p-ink:#C9C6F5; --p-chip:#33305A; --p-acc:#8E89D6; --p-acc-ink:#12102A; --name:#DDA3BF; --m-box:#1F4536; --p-box:#33305A; color-scheme:dark}
 :root[data-app-theme="light"]{color-scheme:light}
-html{overscroll-behavior-y:none}
+html{overscroll-behavior-y:none;touch-action:manipulation}
+*{touch-action:manipulation}
 body::before{content:'';position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:16;opacity:0;transition:opacity .15s;pointer-events:none}
 body.scrolled::before{opacity:1}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
